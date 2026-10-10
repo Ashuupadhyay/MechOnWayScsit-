@@ -77,6 +77,7 @@ app.use("/api/update-profile", updateProfileRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/business", businessRoutes);
 app.use("/api/businesses", searchRoutes);
+app.use('/api/app-version', require('./routes/appVersionRoutes'));
 
 // Vehicle routes in correct sequence
 app.use("/api/vehicles", vehicleSearchRoutes);
