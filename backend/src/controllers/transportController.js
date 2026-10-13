@@ -600,7 +600,7 @@ console.log("====================================");
         createdAt: item.createdAt,
         user: {
           _id: item.user || null,
-          name: reviewer?.name || "Guest User",
+          name: reviewer?.name || "Rodio User",
           profileImage: reviewer?.profileImage || "",
         },
       };
