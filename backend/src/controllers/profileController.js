@@ -1286,7 +1286,16 @@ const DEFAULT_PROFILE_IMAGE =
 // UPDATE PROFILE (Dynamic for User, Transporter, Broker - Single or Multi Field)
 const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
+
+
+    const { userId } = req.params;
+
+if (!userId || !/^[a-fA-F0-9]{24}$/.test(userId)) {
+  return res.status(400).json({
+    success: false,
+    message: "Valid User ObjectId is required",
+  });
+}
     const updateData = { ...req.body }; // Captures any single or multiple field sent from frontend
 
     // 1. Find User
@@ -1761,7 +1770,14 @@ updateData.phoneNumber = user.mobile || "";
 
 const getProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const { userId } = req.params;
+
+if (!userId || !/^[a-fA-F0-9]{24}$/.test(userId)) {
+  return res.status(400).json({
+    success: false,
+    message: "Valid User ObjectId is required",
+  });
+}
 
     const user = await User.findById(userId).select("-password");
 
