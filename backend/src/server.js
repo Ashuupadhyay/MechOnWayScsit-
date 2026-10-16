@@ -50,6 +50,7 @@ const reviewRoutes = require("./routes/rodioreviewRoutes");
 const adminReviewRoutes = require("./routes/adminrevewrout");
 const heroslide=require("./routes/heroSlideRoutes.js");
 const mediaPostRoutes = require("./routes/mediaPostRoutes");
+const profileManagementRoutes = require("./routes/profileManagement");
 const directoryLeadRoutes =
   require("./routes/directoryLeadRoutes");
   const notificationRoutes = require("./routes/notificationRoutes");
@@ -115,6 +116,7 @@ app.use(
   directoryLeadRoutes
 );
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/profile-management", profileManagementRoutes);
 
 // const PORT = process.env.PORT || 5000;
 
