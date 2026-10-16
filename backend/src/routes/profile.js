@@ -6,6 +6,6 @@ const auth = require("../middlewhere/auth");
 
 const { getProfile, updateProfile } = require("../controllers/profileController");
 
-router.get("/", protect,auth, getProfile);
-router.put("/",protect, auth, upload.single("profileImage"), updateProfile);
+router.get("/", getProfile);
+router.put("/", upload.single("profileImage"), updateProfile);
 module.exports = router;

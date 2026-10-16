@@ -48,7 +48,7 @@ router.patch(
 router.delete(
     "/:id",
     protect,
-    auth,
+
     deleteLead
 );
 // ADMIN CREATE LOAD
