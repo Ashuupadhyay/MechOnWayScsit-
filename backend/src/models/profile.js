@@ -61,7 +61,12 @@ phoneNumber: {
     profileImage: {
         type: String,
         default: ""
-    }
+    },
+
+    adImage: {
+  type: String,
+  default: ""
+},
 
 }, {
     timestamps: true

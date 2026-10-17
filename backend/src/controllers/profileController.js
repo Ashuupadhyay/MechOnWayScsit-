@@ -1975,7 +1975,56 @@ const getProfile = async (req, res) => {
 }
 };
 
+
+
+// ==========================================
+// UPLOAD SEPARATE AD IMAGE
+// ==========================================
+const updateAdImage = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select an ad image.",
+      });
+    }
+
+    const adImageUrl = await uploadToCloudinary(
+      req.file.buffer,
+      "profile-ad-images"
+    );
+
+    let profile = await Profile.findOne({ user: userId });
+
+    if (!profile) {
+      profile = new Profile({
+        user: userId,
+        adImage: adImageUrl,
+      });
+    } else {
+      profile.adImage = adImageUrl;
+    }
+
+    await profile.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Ad image uploaded successfully.",
+      adImage: profile.adImage,
+    });
+  } catch (error) {
+    console.error("Ad Image Upload Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to upload ad image.",
+    });
+  }
+};
 module.exports = {
   getProfile,
   updateProfile,
+    updateAdImage,
 };
