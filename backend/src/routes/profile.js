@@ -17,6 +17,6 @@ router.get("/", getProfile);
 router.put("/", upload.single("profileImage"), updateProfile);
 
 // New separate Ad Photo upload
-router.put("/ad-image", upload.single("adImage"), protect, updateAdImage);
+router.put("/ad-image", upload.single("adImage"), updateAdImage);
 
 module.exports = router;
