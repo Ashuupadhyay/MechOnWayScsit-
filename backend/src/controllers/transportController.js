@@ -521,7 +521,7 @@ if (!business) {
     // =====================================================
     const [user, profile, vehicles, posts, comments,documents,] = await Promise.all([
       User.findById(business.user).select("role subscription mobile"),
-      Profile.findOne({ user: business.user }).select("name profileImage"),
+    Profile.findOne({ user: business.user }).select("name profileImage adImage"),
       Vehicle.find({
         business: business._id,
         status: { $ne: "inactive" },
@@ -632,11 +632,11 @@ console.log("====================================");
   ? "verified"
   : "pending",
         name: business.name || "",
-
-        profile: {
-          name: profile?.name || business.firmName || "",
-          profileImage: profile?.profileImage || "",
-        },
+profile: {
+  name: profile?.name || business.firmName || "",
+  profileImage: profile?.profileImage || "",
+  adImage: profile?.adImage || "",
+},
 
         role: user?.role || business.category || "",
         mobile: user?.mobile || "",
