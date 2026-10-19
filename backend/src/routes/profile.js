@@ -11,12 +11,12 @@ const {
   updateAdImage,
 } = require("../controllers/profileController");
 
-router.get("/", getProfile);
+router.get("/",auth, getProfile);
 
 // Existing Profile Photo — unchanged
-router.put("/", upload.single("profileImage"), updateProfile);
+router.put("/", auth,upload.single("profileImage"), updateProfile);
 
 // New separate Ad Photo upload
-router.put("/ad-image", upload.single("adImage"), updateAdImage);
+router.put("/ad-image", auth,upload.single("adImage"), updateAdImage);
 
 module.exports = router;
