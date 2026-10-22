@@ -54,6 +54,7 @@ const profileManagementRoutes = require("./routes/profileManagement");
 const directoryLeadRoutes =
   require("./routes/directoryLeadRoutes");
   const notificationRoutes = require("./routes/notificationRoutes");
+  const advertisementManagementRoutes = require("./routes/advertisementManagement");
 //const adminUserRoutes2 = require("./routes/adminUserRoutes2");
 /*
     API Routes
@@ -117,6 +118,8 @@ app.use(
 );
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/profile-management", profileManagementRoutes);
+
+app.use("/api/advertisement-management", advertisementManagementRoutes);
 
 // const PORT = process.env.PORT || 5000;
 
