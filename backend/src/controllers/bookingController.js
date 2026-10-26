@@ -584,77 +584,134 @@ exports.deleteLead = async (req, res) => {
 
 
 
-
-
-// ===============================
-// Get All Bookings (Marketplace Leads)
-// ===============================
 exports.getAllBookings = async (req, res) => {
-    try {
-        const bookings = await Booking.find()
-            .populate("createdBy", "name email role")
-            .sort({ createdAt: -1 })
-            .lean();
+  try {
+    const { from, to, vehicleType } = req.query;
 
-        const bookingsWithBidCount = await Promise.all(
-            bookings.map(async (booking) => {
-                // Total Bids Count
-                const bidCount = await Bid.countDocuments({
-                    booking: booking._id
-                });
+    const normalize = value =>
+      String(value || '').trim().toLowerCase();
 
-                // Status Check ("Open" ya "Pending" dono ko Active mano)
-                const isOpen = booking.status === "Open" || booking.status === "Pending";
+    const fromSearch = normalize(from);
+    const toSearch = normalize(to);
+    const vehicleSearch = normalize(vehicleType);
 
-                // Lead ACTIVE tabhi hogi jab Open ho AUR bids 10 se KAM (0 to 9) hon
-                const isAvailable = isOpen && bidCount < 10;
+    // Sabhi bookings load karein
+    const bookings = await Booking.find()
+      .populate('createdBy', 'name email role')
+      .sort({ createdAt: -1 })
+      .lean();
 
-                let availabilityReason = null;
-                let displayStatus = "ACTIVE";
-
-                if (booking.status === "Assigned" || booking.status === "Accepted") {
-                    displayStatus = "ACCEPTED";
-                    availabilityReason = "Lead Accepted";
-                } else if (bidCount >= 10) {
-                    displayStatus = "LIMIT_REACHED";
-                    availabilityReason = "Bid limit reached (10/10)";
-                } else if (!isOpen) {
-                    displayStatus = "INACTIVE";
-                    availabilityReason = "No longer available";
-                }
-
-                return {
-                    ...booking,
-                    status: isOpen ? "Open" : booking.status,
-                    bidCount,
-                    isAvailable,
-                    availabilityReason,
-                    displayStatus
-                };
-            })
-        );
-
-        // Active leads ko TOP par rakhein, baki ko Niche
-        bookingsWithBidCount.sort((a, b) => {
-            if (a.isAvailable && !b.isAvailable) return -1;
-            if (!a.isAvailable && b.isAvailable) return 1;
-            return new Date(b.createdAt) - new Date(a.createdAt);
+    // Bid count aur availability calculate karein
+    const bookingsWithBidCount = await Promise.all(
+      bookings.map(async booking => {
+        const bidCount = await Bid.countDocuments({
+          booking: booking._id,
         });
 
-        return res.status(200).json({
-            success: true,
-            total: bookingsWithBidCount.length,
-            data: bookingsWithBidCount
-        });
+        const isOpen =
+          booking.status === 'Open' ||
+          booking.status === 'Pending';
 
-    } catch (error) {
-        console.error("Get All Bookings Error:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Server Error"
-        });
+        const isAvailable = isOpen && bidCount < 10;
+
+        let displayStatus = 'ACTIVE';
+        let availabilityReason = null;
+
+        if (
+          booking.status === 'Assigned' ||
+          booking.status === 'Accepted'
+        ) {
+          displayStatus = 'ACCEPTED';
+          availabilityReason = 'Lead Accepted';
+        } else if (bidCount >= 10) {
+          displayStatus = 'LIMIT_REACHED';
+          availabilityReason = 'Bid limit reached (10/10)';
+        } else if (!isOpen) {
+          displayStatus = 'INACTIVE';
+          availabilityReason = 'No longer available';
+        }
+
+        return {
+          ...booking,
+          status: isOpen ? 'Open' : booking.status,
+          bidCount,
+          isAvailable,
+          availabilityReason,
+          displayStatus,
+        };
+      }),
+    );
+
+    // From aur To ko booking ke location fields se match karein
+    const matchesRoute = booking => {
+      const pickup = normalize(booking.pickupLocation);
+      const loading = normalize(booking.loading_point);
+
+      const fromMatches =
+        !fromSearch ||
+        pickup.includes(fromSearch) ||
+        loading.includes(fromSearch);
+
+      const toMatches =
+        !toSearch ||
+        pickup.includes(toSearch) ||
+        loading.includes(toSearch);
+
+      return fromMatches && toMatches;
+    };
+
+    let filteredBookings = bookingsWithBidCount;
+
+    // From/To filter apply karein
+    if (fromSearch || toSearch) {
+      filteredBookings = filteredBookings.filter(matchesRoute);
     }
+
+    // Selected vehicle ki available leads pehle dikhayein.
+    // Agar nahi milti, same route ki kisi bhi vehicle ki
+    // available leads fallback ke roop mein dikhayein.
+    if (vehicleSearch) {
+      const exactVehicleLeads = filteredBookings.filter(
+        booking =>
+          booking.isAvailable &&
+          normalize(booking.vehicleType) === vehicleSearch,
+      );
+
+      if (exactVehicleLeads.length > 0) {
+        filteredBookings = exactVehicleLeads;
+      } else {
+        filteredBookings = filteredBookings.filter(
+          booking => booking.isAvailable,
+        );
+      }
+    }
+
+    // Available leads first, latest leads first
+    filteredBookings.sort((a, b) => {
+      if (a.isAvailable && !b.isAvailable) return -1;
+      if (!a.isAvailable && b.isAvailable) return 1;
+
+      return (
+        new Date(b.createdAt || 0) -
+        new Date(a.createdAt || 0)
+      );
+    });
+
+    return res.status(200).json({
+      success: true,
+      total: filteredBookings.length,
+      data: filteredBookings,
+    });
+  } catch (error) {
+    console.error('Get All Bookings Error:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error',
+    });
+  }
 };
+
 
 // ==========================
 // My Assigned Leads
