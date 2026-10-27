@@ -31,6 +31,10 @@ const register = async (req, res) => {
       "mechanic and service center",
       "biketexiauto",
       "candfagent",
+       "Shipping_co",
+        "Refvan",
+        "Tanker",
+        "Motor_Broker",
     ];
 
     if (!allowedRoles.includes(role)) {
@@ -568,6 +572,10 @@ const login = async (req, res) => {
             "mechanic and service center",
             "biketexiauto",
             "candfagent",
+            "Shipping_co",
+               "Refvan",
+                 "Tanker",
+             "Motor_Broker",
         ];
 
         if (businessRoles.includes(user.role)) {

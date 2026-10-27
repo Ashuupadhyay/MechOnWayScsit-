@@ -261,6 +261,10 @@ const businessSchema = new mongoose.Schema(
         "mechanic and service center",
         "biketexiauto",
         "candfagent",
+         "Shipping_co",
+        "Refvan",
+        "Tanker",
+        "Motor_Broker"
       ],
     },
 
