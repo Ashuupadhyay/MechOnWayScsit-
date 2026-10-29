@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const vehicleSchema = new mongoose.Schema(
@@ -16,21 +17,16 @@ const vehicleSchema = new mongoose.Schema(
       index: true,
     },
 
-    vehicleNumber: {
-      type: String,
-   
-      trim: true,
-      uppercase: true,
-    },
-
     capacity: {
       type: String,
       trim: true,
+      default: "",
     },
 
     bodyType: {
       type: String,
       trim: true,
+      default: "",
     },
 
     status: {
@@ -41,17 +37,6 @@ const vehicleSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
-);
-
-vehicleSchema.index(
-  {
-    business: 1,
-    vehicleNumber: 1,
-  },
-  {
-    unique: true,
-     sparse: true,
   }
 );
 

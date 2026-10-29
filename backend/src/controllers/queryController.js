@@ -58,7 +58,7 @@ await sheets.spreadsheets.values.append({
 });
     return res.status(201).json({
       success: true,
-      message: "Query submitted successfully.Our team replay soon",
+      message: "Query submitted successfully.Our team reply soon",
       data: contact,
     });
   } catch (error) {
