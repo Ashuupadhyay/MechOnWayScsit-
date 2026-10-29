@@ -827,9 +827,117 @@ const addReply = async (req, res) => {
     }
 };
 
+const deleteComment = async (req, res) => {
+  try {
+    const { id, commentId } = req.params;
 
+    const review = await Comment.findOne({
+      _id: commentId,
+      transporter: id,
+    });
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: 'Comment not found',
+      });
+    }
+
+    if (String(review.user) !== String(req.user.id)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can delete only your own comment',
+      });
+    }
+
+    await Comment.findByIdAndDelete(commentId);
+
+    const provider =
+      (await Business.findById(id)) ||
+      (await DirectoryLead.findById(id));
+
+    if (provider) {
+      const remaining = await Comment.find({ transporter: id });
+
+      provider.totalReviews = remaining.length;
+      provider.averageRating = remaining.length
+        ? remaining.reduce((sum, item) => sum + Number(item.rating || 0), 0) /
+          remaining.length
+        : 0;
+
+      if (Array.isArray(provider.comments)) {
+        provider.comments = provider.comments.filter(
+          item => String(item) !== String(commentId),
+        );
+      }
+
+      await provider.save();
+    }
+
+    return res.json({
+      success: true,
+      message: 'Comment deleted successfully',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const deleteReply = async (req, res) => {
+  try {
+    const { id, commentId, replyId } = req.params;
+
+    const review = await Comment.findOne({
+      _id: commentId,
+      transporter: id,
+    });
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: 'Comment not found',
+      });
+    }
+
+    const reply = review.replies.id(replyId);
+
+    if (!reply) {
+      return res.status(404).json({
+        success: false,
+        message: 'Reply not found',
+      });
+    }
+
+    const replyUserId = reply.user?._id || reply.user;
+
+    if (String(replyUserId) !== String(req.user.id)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can delete only your own reply',
+      });
+    }
+
+    reply.deleteOne();
+    await review.save();
+
+    return res.json({
+      success: true,
+      message: 'Reply deleted successfully',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 module.exports = {
-    addComment,
-    getTransporterComments,
-      addReply
+  addComment,
+  getTransporterComments,
+  addReply,
+  deleteComment,
+  deleteReply,
 };
