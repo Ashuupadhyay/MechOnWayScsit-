@@ -449,3 +449,148 @@ exports.adminDeleteReview = async (req, res) => {
     });
   }
 };
+
+// Add reply or nested reply
+exports.addReviewReply = async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    const { id } = req.params;
+    const { comment, parentReplyId = null } = req.body || {};
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first",
+      });
+    }
+
+    if (!comment || !comment.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Reply cannot be empty",
+      });
+    }
+
+    const review = await Review.findById(id);
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
+    if (parentReplyId) {
+      const parentExists = review.replies.id(parentReplyId);
+
+      if (!parentExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Parent reply not found",
+        });
+      }
+    }
+
+    review.replies.push({
+      user: userId,
+      comment: comment.trim(),
+      parentReplyId: parentReplyId || null,
+    });
+
+    await review.save();
+
+    await review.populate("replies.user", "mobile role");
+
+    return res.status(201).json({
+      success: true,
+      message: "Reply added successfully",
+      review,
+    });
+  } catch (error) {
+    console.error("Add review reply error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to add reply",
+    });
+  }
+};
+
+
+// Delete own reply or nested reply
+exports.deleteReviewReply = async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    const { id, replyId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first",
+      });
+    }
+
+    const review = await Review.findById(id);
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
+    const reply = review.replies.id(replyId);
+
+    if (!reply) {
+      return res.status(404).json({
+        success: false,
+        message: "Reply not found",
+      });
+    }
+
+    if (String(reply.user) !== String(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: "You can delete only your own reply",
+      });
+    }
+
+    // Also delete nested replies belonging to this reply.
+    const idsToDelete = new Set([String(replyId)]);
+    let changed = true;
+
+    while (changed) {
+      changed = false;
+
+      review.replies.forEach(item => {
+        const parentId = item.parentReplyId
+          ? String(item.parentReplyId)
+          : "";
+
+        if (idsToDelete.has(parentId) && !idsToDelete.has(String(item._id))) {
+          idsToDelete.add(String(item._id));
+          changed = true;
+        }
+      });
+    }
+
+    review.replies = review.replies.filter(
+      item => !idsToDelete.has(String(item._id))
+    );
+
+    await review.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Reply deleted successfully",
+      review,
+    });
+  } catch (error) {
+    console.error("Delete review reply error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete reply",
+    });
+  }
+};

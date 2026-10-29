@@ -1,5 +1,26 @@
 const mongoose = require("mongoose");
 
+const replySchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    comment: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 1000,
+    },
+    parentReplyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
+  },
+  { timestamps: true }
+);
+
 const reviewSchema = new mongoose.Schema(
   {
     user: {
@@ -8,14 +29,12 @@ const reviewSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-
     rating: {
       type: Number,
       required: true,
       min: 1,
       max: 5,
     },
-
     comment: {
       type: String,
       required: true,
@@ -23,10 +42,9 @@ const reviewSchema = new mongoose.Schema(
       minlength: 2,
       maxlength: 1000,
     },
+    replies: [replySchema],
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 module.exports =
