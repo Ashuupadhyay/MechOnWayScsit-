@@ -748,8 +748,88 @@ const getTransporterComments = async (req, res) => {
     }
 };
 
+const addReply = async (req, res) => {
+    try {
+        const { comment = "", media = [] } = req.body;
+        const { id, commentId } = req.params;
+
+        if (
+            typeof comment !== "string" ||
+            !Array.isArray(media) ||
+            (!comment.trim() && media.length === 0)
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Reply text or media is required",
+            });
+        }
+
+        if (
+            media.some(
+                (item) =>
+                    !item.url ||
+                    !["image", "gif"].includes(item.type)
+            )
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid media data",
+            });
+        }
+
+        const provider =
+            (await Business.findById(id)) ||
+            (await DirectoryLead.findOne({
+                _id: id,
+                status: "dummy",
+                isActive: true,
+            }));
+
+        if (!provider) {
+            return res.status(404).json({
+                success: false,
+                message: "Business profile not found",
+            });
+        }
+
+        const review = await Comment.findOne({
+            _id: commentId,
+            transporter: provider._id,
+        });
+
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: "Comment not found",
+            });
+        }
+
+        review.replies.push({
+            user: req.user.id,
+            comment: comment.trim(),
+            media,
+        });
+
+        await review.save();
+
+        return res.status(201).json({
+            success: true,
+            message: "Reply added successfully",
+            data: review,
+        });
+    } catch (error) {
+        console.error("ADD REPLY ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 
 module.exports = {
     addComment,
-    getTransporterComments
+    getTransporterComments,
+      addReply
 };

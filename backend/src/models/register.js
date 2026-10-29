@@ -129,10 +129,7 @@ const userSchema = new mongoose.Schema(
         "mechanic and service center",
         "biketexiauto",
         "candfagent",
-        "Shipping_co",
-        "Refvan",
-        "Tanker",
-        "Motor_Broker"
+        
       ],
       required: [true, "Role is required"],
     },
