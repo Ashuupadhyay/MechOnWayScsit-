@@ -34,6 +34,7 @@ const postRoutes = require("./routes/postRoutes");
 const adminDocumentRoutes = require(
   "./routes/adminDocumentRoutes"
 );
+const featuredAdRoutes = require("./routes/featuredAdRoutes");
 const cron = require("node-cron");
 const expireSubscriptions = require("./controllers/subscriptionExpiry");
 const subscriptionRoutes = require("./routes/subscription");
@@ -120,7 +121,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/profile-management", profileManagementRoutes);
 
 app.use("/api/advertisement-management", advertisementManagementRoutes);
-
+app.use("/api/featured-ads", featuredAdRoutes);
 // const PORT = process.env.PORT || 5000;
 
 // const startServer = async () => {
