@@ -536,6 +536,7 @@
 const Comment = require("../models/comments");
 const Business = require("../models/business");
 const DirectoryLead = require("../models/directoryLead");
+const User = require("../models/register");
 
 // ============================
 // ADD COMMENT / RATING
@@ -692,12 +693,14 @@ const getTransporterComments = async (req, res) => {
         const provider = await Business.findById(req.params.id);
 
         if (provider) {
-
             const comments = await Comment.find({
-                transporter: provider._id
-            })
-                .populate("user", "name email mobile role")
-                .sort({ createdAt: -1 });
+  transporter: provider._id,
+})
+  .populate("user", "mobile role firmName")
+  .populate("replies.user", "mobile role firmName")
+  .sort({ createdAt: -1 });
+
+    
 
             return res.status(200).json({
                 success: true,

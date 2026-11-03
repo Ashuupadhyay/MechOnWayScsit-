@@ -28,7 +28,12 @@ const bookingSchema = new mongoose.Schema(
         "partstypesbettry_supplier",
         "mechanic and service center",
         "biketexiauto",
-        "candfagent"],
+        "candfagent",
+        "Shipping_co",
+        "Refvan",
+        "Tanker",
+        "Motor_Broker",
+      ],
       required: true,
     },
 
