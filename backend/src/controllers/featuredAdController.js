@@ -51,10 +51,10 @@ exports.createFeaturedAd = async (req, res) => {
       });
     }
 
-    const uploadResult = await require("../config/cloudinary")
+    const uploadResult = await require("../config/cloudnary")
       .cloudinary.uploader.upload_stream;
 
-    const cloudinary = require("../config/cloudinary").cloudinary;
+    const cloudinary = require("../config/cloudnary").cloudinary;
 
     const result = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
@@ -126,7 +126,7 @@ exports.updateFeaturedAd = async (req, res) => {
     let oldPublicId = null;
 
     if (req.file) {
-      const cloudinary = require("../config/cloudinary").cloudinary;
+      const cloudinary = require("../config/cloudnary").cloudinary;
 
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
