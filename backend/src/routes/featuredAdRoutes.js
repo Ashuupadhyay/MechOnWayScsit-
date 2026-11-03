@@ -8,7 +8,7 @@ const {
   deleteFeaturedAd,
 } = require("../controllers/featuredAdController");
 
-const { upload } = require("../config/cloudinary");
+const { upload } = require("../config/cloudnary");
 
 router.get("/", getFeaturedAds);
 router.post("/", upload.single("image"), createFeaturedAd);

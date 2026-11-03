@@ -3,7 +3,7 @@ const FeaturedAd = require("../models/FeaturedAd");
 const {
   uploadToCloudinary,
   deleteFromCloudinary,
-} = require("../config/cloudinary");
+} = require("../config/cloudnary");
 
 // GET ALL FEATURED ADS
 exports.getFeaturedAds = async (req, res) => {
